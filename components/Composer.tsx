@@ -14,12 +14,22 @@ function useFillPct() {
     const screen = document.getElementById(PREVIEW_ID);
     const bub = screen?.querySelector('[data-draft-bubble="1"]') as HTMLElement | null;
     const body = screen?.querySelector(".body") as HTMLElement | null;
-    const h = body?.getBoundingClientRect().height ?? 0;
-    if (!bub || !h) {
+    if (!bub || !body || !screen) {
       setPct((p) => (p === 0 ? p : 0));
       return;
     }
-    const next = (bub.getBoundingClientRect().height / h) * 100;
+    const bodyBox = body.getBoundingClientRect();
+    const screenBox = screen.getBoundingClientRect();
+    if (!bodyBox.height || !screenBox.width) {
+      setPct((p) => (p === 0 ? p : 0));
+      return;
+    }
+    // On a phone the preview fills the viewport rather than holding a 390×844
+    // shape, so measure against the message area a real phone would have at
+    // this width. On desktop the two are identical.
+    const chrome = screenBox.height - bodyBox.height;
+    const reference = Math.max(1, (screenBox.width * 844) / 390 - chrome);
+    const next = (bub.getBoundingClientRect().height / reference) * 100;
     setPct((p) => (Math.abs(p - next) < 0.5 ? p : next));
   }, []);
 

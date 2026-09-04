@@ -50,6 +50,14 @@ above the home indicator.
 
 The phone layout differs from the desktop one:
 
+- the preview drops the phone casing to a hairline and fills the space instead
+  of holding a 390×844 shape — a mock phone inside a real one spends the pixels
+  that matter on bezel. The transcript ends up around 376×456 rather than
+  243×333, so text wraps the way it will on a real screen. The mock status bar
+  and home indicator shrink too, since the device's own are an inch above
+- "% of their screen" still means a real phone: it's measured against the
+  message area a 390×844 device would have at the rendered width, not against
+  however tall the preview happens to be
 - one top row that never wraps — menu, undo/redo, and the POV switch, which is
   the control you actually reach for
 - a five-item bottom bar (Preview, Draft, Thread, Import, Setup) as the only
@@ -116,6 +124,15 @@ yet at that point and confirming each junk OCR line would be miserable.
 platform and per theme from the Setup tab and stored with your data. My values
 are close but they were not sampled from the real apps — hold a real screenshot
 next to the preview and nudge anything that looks off.
+
+**Share links.** *Setup → Share this chat* packs the whole conversation into
+the URL itself, after the `#`. Fragments are never sent to the server, so the
+link is self-contained: open it on another device, or send it to someone who
+can reach the app at the same address, and the thread arrives as a new chat.
+A six-message thread is about 380 characters (JSON, deflated, base64url).
+Photos and attachments are left out — a link carrying a data URL would be
+megabytes. Links over ~8,000 characters get a warning, since some chat apps
+truncate them.
 
 **Export.** Save the preview as a PNG (captures what you're actually looking
 at, scroll position included), or back up everything as JSON.

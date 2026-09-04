@@ -68,7 +68,8 @@ export default function Workbench() {
   const noticeAt = state.notice?.at;
   useEffect(() => {
     if (!state.notice) return;
-    setToast(`${state.notice.dir === "undo" ? "Undid" : "Redid"} ${state.notice.label}`);
+    const n = state.notice;
+    setToast(n.dir === "info" ? n.label : `${n.dir === "undo" ? "Undid" : "Redid"} ${n.label}`);
     const t = setTimeout(() => setToast(null), 2600);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -213,7 +214,7 @@ export default function Workbench() {
             {thread ? (
               <>
                 <Preview width={width} />
-                <div className="tiny muted" style={{ textAlign: "center", maxWidth: 380 }}>
+                <div className="tiny muted stage-caption" style={{ textAlign: "center", maxWidth: 380 }}>
                   {s.pov === "me"
                     ? "Your phone. Switch to their phone to see how your draft lands."
                     : `${thread.name}'s phone — your messages are the ones on the left.`}
@@ -253,7 +254,7 @@ export default function Workbench() {
       {toast && (
         <div className="toast" role="status">
           {toast}
-          {canRedo && (
+          {canRedo && state.notice?.dir !== "info" && (
             <button className="btn sm ghost" onClick={() => dispatch({ type: "redo" })}>
               Redo
             </button>

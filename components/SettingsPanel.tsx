@@ -6,6 +6,7 @@ import { THEME_LABELS, TUNABLE_KEYS } from "@/lib/platforms";
 import type { PlatformTheme, ThemeMode } from "@/lib/types";
 import { readFileAsDataURL, shrinkImage } from "@/lib/util";
 import { PREVIEW_ID } from "./Preview";
+import { buildShareUrl, encodeThread } from "@/lib/share";
 
 export default function SettingsPanel() {
   const { state, dispatch, thread } = useStore();
@@ -15,6 +16,8 @@ export default function SettingsPanel() {
   const jsonRef = useRef<HTMLInputElement>(null);
   const [avatarFor, setAvatarFor] = useState<"them" | "me">("them");
   const [saving, setSaving] = useState(false);
+  const [link, setLink] = useState<string | null>(null);
+  const [linkNote, setLinkNote] = useState<string | null>(null);
 
   if (!thread) return null;
 
@@ -58,6 +61,35 @@ export default function SettingsPanel() {
         body.scrollTop = scrollTop;
       }
       setSaving(false);
+    }
+  };
+
+  const makeLink = async () => {
+    if (!thread) return null;
+    const url = buildShareUrl(await encodeThread(thread));
+    setLink(url);
+    return url;
+  };
+
+  const copyLink = async () => {
+    const url = await makeLink();
+    if (!url) return;
+    try {
+      await navigator.clipboard.writeText(url);
+      setLinkNote(`Copied · ${url.length.toLocaleString()} characters`);
+    } catch {
+      setLinkNote("Couldn't reach the clipboard — the link is in the box below.");
+    }
+  };
+
+  const shareLink = async () => {
+    const url = await makeLink();
+    if (!url) return;
+    try {
+      await navigator.share({ title: `Chat with ${thread.name}`, url });
+      setLinkNote(null);
+    } catch {
+      /* the sheet was dismissed */
     }
   };
 
@@ -255,6 +287,41 @@ export default function SettingsPanel() {
         >
           Reset {platform.name} colours
         </button>
+      </div>
+
+      <div className="section">
+        <h3>Share this chat</h3>
+        <div className="tiny muted" style={{ marginBottom: 10 }}>
+          The whole conversation is packed into the link itself, after the{" "}
+          <code>#</code> — so it never touches a server. Anyone who opens it needs to be able to
+          reach this app at the same address. Photos and attachments are left out.
+        </div>
+        <div className="row wrap">
+          <button className="btn primary" onClick={copyLink}>
+            Copy share link
+          </button>
+          {typeof navigator !== "undefined" && "share" in navigator && (
+            <button className="btn" onClick={shareLink}>
+              Share…
+            </button>
+          )}
+        </div>
+        {link && (
+          <>
+            <input
+              className="field"
+              style={{ marginTop: 10, fontSize: 12 }}
+              readOnly
+              value={link}
+              onFocus={(e) => e.currentTarget.select()}
+            />
+            <div className="tiny muted" style={{ marginTop: 6 }}>
+              {linkNote ?? `${link.length.toLocaleString()} characters`}
+              {link.length > 8000 &&
+                " — long enough that some chat apps will cut it. Trim the thread or send the JSON backup instead."}
+            </div>
+          </>
+        )}
       </div>
 
       <div className="section">

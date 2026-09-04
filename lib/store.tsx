@@ -16,6 +16,7 @@ import type {
   Settings,
   Thread,
 } from "./types";
+import { clearShareHash, decodeThread, readSharePayload } from "./share";
 import { getPlatform } from "./platforms";
 import { uid } from "./util";
 
@@ -31,8 +32,8 @@ export interface State {
   /** undo history; never persisted */
   past: Snapshot[];
   future: Snapshot[];
-  /** set on undo/redo so the UI can say what just happened */
-  notice: { label: string; dir: "undo" | "redo"; at: number } | null;
+  /** transient status line for the UI (undo/redo, shared-link import) */
+  notice: { label: string; dir: "undo" | "redo" | "info"; at: number } | null;
 }
 
 /** The slice of state that undo restores. */
@@ -130,6 +131,8 @@ export type Action =
   | { type: "resetOverrides"; platform: PlatformId }
   | { type: "storageError"; message: string | null }
   | { type: "importAll"; state: Pick<State, "threads" | "activeId" | "drafts" | "settings"> }
+  | { type: "addThread"; thread: Thread }
+  | { type: "notice"; label: string }
   | { type: "undo" }
   | { type: "redo" };
 
@@ -173,6 +176,12 @@ function baseReducer(state: State, action: Action): State {
       };
       return { ...state, threads: [t, ...state.threads], activeId: t.id };
     }
+
+    case "addThread":
+      return { ...state, threads: [action.thread, ...state.threads], activeId: action.thread.id };
+
+    case "notice":
+      return { ...state, notice: { label: action.label, dir: "info", at: Date.now() } };
 
     case "deleteThread": {
       const threads = state.threads.filter((t) => t.id !== action.id);
@@ -280,6 +289,8 @@ function undoMeta(a: Action): { label: string; key?: string } | null {
   switch (a.type) {
     case "newThread":
       return { label: "new chat" };
+    case "addThread":
+      return { label: "opened shared chat" };
     case "deleteThread":
       return { label: "delete chat" };
     case "patchThread":
@@ -436,6 +447,40 @@ export function StoreProvider({ children }: { children: React.ReactNode }) {
     }, 250);
     return () => clearTimeout(id);
   }, [state.threads, state.activeId, state.drafts, state.settings, state.loaded]);
+
+  // A link like #t=… carries a whole conversation. This also has to cope with
+  // the link arriving while the app is already open: opening one then is a
+  // same-document navigation, so nothing remounts and only hashchange fires.
+  const lastPayload = useRef<string | null>(null);
+  useEffect(() => {
+    if (!state.loaded) return;
+    let cancelled = false;
+
+    const consume = async () => {
+      const payload = readSharePayload();
+      if (!payload || payload === lastPayload.current) return;
+      lastPayload.current = payload;
+      // Clear the hash before awaiting: decoding is async, and a second
+      // listener firing in that gap would import the same link twice.
+      clearShareHash();
+      const shared = await decodeThread(payload);
+      if (cancelled) return;
+      if (shared) {
+        dispatch({ type: "addThread", thread: shared });
+        dispatch({ type: "notice", label: `Opened shared chat with ${shared.name}` });
+      } else {
+        dispatch({ type: "notice", label: "That shared link couldn't be read" });
+      }
+    };
+
+    void consume();
+    const onHash = () => void consume();
+    window.addEventListener("hashchange", onHash);
+    return () => {
+      cancelled = true;
+      window.removeEventListener("hashchange", onHash);
+    };
+  }, [state.loaded]);
 
   const thread = useMemo(
     () => state.threads.find((t) => t.id === state.activeId) ?? state.threads[0] ?? null,

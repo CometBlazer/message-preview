@@ -120,6 +120,8 @@ button {
 .cols {
   display: grid;
   grid-template-columns: 236px minmax(0, 1fr) 380px;
+  /* bound the row, or the stage grows to its content and spills */
+  grid-template-rows: minmax(0, 1fr);
   min-height: 0;
 }
 
@@ -803,9 +805,24 @@ label.lbl {
   .pane.tools {
     display: none;
   }
+  /* A phone rendering a phone wastes the pixels that matter. Drop the casing
+     to a hairline and let the screen fill the space: the text then renders at
+     roughly life size, which is both more readable and more truthful. */
   .stage {
-    padding: 8px 8px 0;
+    padding: 6px 6px 0;
+    place-items: stretch;
+    /* pin the row to the container, or it sizes to the phone's content */
+    grid-template-rows: minmax(0, 1fr);
     --stage-chrome: 178px;
+  }
+  .stage-inner {
+    width: 100%;
+    height: 100%;
+    align-items: stretch;
+    gap: 6px;
+  }
+  .stage-caption {
+    display: none;
   }
   .app[data-tab="tools"] .pane.tools {
     display: block;
@@ -935,14 +952,6 @@ label.lbl {
 /* very narrow phones: give the preview every pixel it can get */
 @media (max-width: 430px) {
   .stage {
-    padding: 6px 4px 0;
-    --stage-chrome: 168px;
-  }
-  .phone.framed {
-    padding: 7px;
-    border-radius: 44px;
-  }
-  .phone.framed .screen {
-    border-radius: 37px;
+    padding: 5px 4px 0;
   }
 }
