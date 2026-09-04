@@ -1,0 +1,955 @@
+/* ── Phone + platform skins ────────────────────────────────────────────────
+   Every colour comes in as a CSS variable from lib/platforms.ts, so the same
+   markup renders as any platform. Layout/typography differences live here.  */
+
+.phone {
+  position: relative;
+  /* never taller than the stage: height drives the width back down */
+  width: min(var(--phone-w, 390px), 100%, calc((100dvh - var(--stage-chrome, 150px)) * 390 / 844));
+  flex: none;
+}
+
+.phone.framed {
+  padding: 11px;
+  border-radius: 55px;
+  background: linear-gradient(160deg, #3a3d47, #17181d 40%, #23252c);
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.14) inset,
+    0 34px 70px rgba(0, 0, 0, 0.55),
+    0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.phone.framed::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 50px;
+  border: 1px solid rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.screen {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  aspect-ratio: 390 / 844;
+  overflow: hidden;
+  border-radius: 44px;
+  background: var(--bg);
+  background-image: var(--pattern, none);
+  color: var(--in-fg);
+  /* Real SF on Apple hardware, Inter everywhere else. */
+  font-family: -apple-system, BlinkMacSystemFont, var(--sans);
+  font-size: var(--fs, 16px);
+  line-height: 1.3;
+  isolation: isolate;
+}
+
+.phone:not(.framed) .screen {
+  border-radius: 20px;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.screen[data-font="roboto"] {
+  font-family: var(--roboto);
+}
+
+/* ── Status bar ─────────────────────────────────────────────────────────── */
+
+.sb {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 26px 7px;
+  height: 50px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--hdr-fg);
+  background: var(--hdr-bg);
+  z-index: 3;
+}
+
+.sb .island {
+  position: absolute;
+  top: 11px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 106px;
+  height: 30px;
+  border-radius: 20px;
+  background: #000;
+}
+
+.sb .sb-icons {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.sb.android {
+  height: 30px;
+  padding: 0 14px 4px;
+  font-size: 12.5px;
+  font-weight: 500;
+}
+
+.sb.android .island {
+  display: none;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+.hdr {
+  position: relative;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px 9px;
+  background: var(--hdr-bg);
+  color: var(--hdr-fg);
+  border-bottom: 0.5px solid var(--line);
+  backdrop-filter: saturate(160%) blur(18px);
+  z-index: 3;
+}
+
+.hdr .back {
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  font-size: 17px;
+  flex: none;
+}
+
+.hdr-av {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--av-bg);
+  flex: none;
+}
+
+.hdr-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.hdr-name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hdr-sub {
+  font-size: 11.5px;
+  color: var(--hdr-sub);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hdr-actions {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  color: var(--accent);
+  flex: none;
+}
+
+/* iOS centred header: avatar stacked above a small name */
+.hdr.ios {
+  flex-direction: column;
+  gap: 2px;
+  padding: 2px 12px 8px;
+}
+
+.hdr.ios .ios-side {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: var(--accent);
+}
+
+.hdr.ios .ios-side.left {
+  left: 10px;
+}
+
+.hdr.ios .ios-side.right {
+  right: 14px;
+}
+
+.hdr.ios .hdr-av {
+  width: 42px;
+  height: 42px;
+  font-size: 15px;
+}
+
+.hdr.ios .hdr-name {
+  font-size: 11.5px;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  max-width: 60%;
+}
+
+/* WhatsApp / Telegram: avatar + name inline on the left */
+.hdr.inline .hdr-name {
+  font-size: 16.5px;
+}
+
+/* Instagram */
+.hdr.ig {
+  padding: 8px 12px 10px;
+  gap: 11px;
+}
+
+.hdr.ig .hdr-actions {
+  color: var(--hdr-fg);
+}
+
+/* Hinge / Tinder */
+.hdr.match {
+  flex-direction: column;
+  gap: 5px;
+  padding: 4px 12px 10px;
+}
+
+.hdr.match .hdr-av {
+  width: 46px;
+  height: 46px;
+}
+
+.hdr.match .hdr-name {
+  font-family: var(--serif);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.hdr.match .ios-side {
+  position: absolute;
+  top: 14px;
+  color: var(--hdr-fg);
+}
+
+/* Discord */
+.hdr.dc {
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--line);
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+/* ── Body ───────────────────────────────────────────────────────────────── */
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 11px 6px;
+  gap: 2px;
+  scrollbar-width: none;
+  background-image: var(--pattern, none);
+  background-size: 260px;
+}
+
+.body::-webkit-scrollbar {
+  display: none;
+}
+
+.body > .grow {
+  flex: 1 0 auto;
+  min-height: 4px;
+}
+
+.divider {
+  align-self: center;
+  color: var(--meta);
+  font-size: 11px;
+  padding: 12px 0 8px;
+  text-align: center;
+  max-width: 90%;
+}
+
+.divider b {
+  font-weight: 600;
+}
+
+.divider.chip {
+  background: var(--chip-bg, rgba(0, 0, 0, 0.06));
+  color: var(--meta);
+  border-radius: 8px;
+  padding: 5px 11px;
+  margin: 10px auto 8px;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.mrow {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  width: 100%;
+}
+
+.mrow.out {
+  justify-content: flex-end;
+}
+
+.mrow.gap {
+  margin-top: 8px;
+}
+
+.bubble {
+  position: relative;
+  max-width: var(--maxw, 74%);
+  padding: 7px 12px 8px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: inherit;
+  letter-spacing: -0.005em;
+}
+
+.bubble .txt {
+  position: relative;
+  z-index: 2;
+}
+
+.bubble.out {
+  background: var(--out);
+  color: var(--out-fg);
+}
+
+.bubble.in {
+  background: var(--in);
+  color: var(--in-fg);
+}
+
+.bubble img.att {
+  display: block;
+  max-width: 100%;
+  border-radius: 10px;
+  margin-bottom: 5px;
+  position: relative;
+  z-index: 2;
+}
+
+.receipt {
+  align-self: flex-end;
+  font-size: 11px;
+  color: var(--meta);
+  padding: 2px 3px 4px;
+  letter-spacing: -0.01em;
+}
+
+.reaction {
+  position: absolute;
+  top: -13px;
+  font-size: 12px;
+  background: var(--in);
+  border: 2px solid var(--bg);
+  border-radius: 20px;
+  padding: 1px 5px;
+  z-index: 4;
+  line-height: 1.2;
+}
+
+.bubble.out .reaction {
+  left: -8px;
+}
+
+.bubble.in .reaction {
+  right: -8px;
+}
+
+.mini-av {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--av-bg);
+  margin-bottom: 1px;
+}
+
+.mini-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.mini-av.hole {
+  visibility: hidden;
+}
+
+/* typing indicator */
+.typing {
+  display: inline-flex;
+  gap: 4px;
+  align-items: center;
+  padding: 11px 14px;
+}
+
+.typing i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--meta);
+  animation: blink 1.3s infinite ease-in-out;
+}
+
+.typing i:nth-child(2) {
+  animation-delay: 0.18s;
+}
+.typing i:nth-child(3) {
+  animation-delay: 0.36s;
+}
+
+@keyframes blink {
+  0%, 60%, 100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+/* ── Input bar ──────────────────────────────────────────────────────────── */
+
+.bar {
+  flex: none;
+  display: flex;
+  align-items: flex-end;
+  gap: 9px;
+  padding: 8px 11px 6px;
+  background: var(--bar-bg);
+  border-top: 0.5px solid var(--line);
+  color: var(--meta);
+}
+
+.bar .pill {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: 19px;
+  padding: 7px 11px;
+  color: var(--input-fg);
+  font-size: 15px;
+  min-height: 34px;
+}
+
+.bar .pill .ph {
+  color: var(--meta);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.bar .pill .typed {
+  flex: 1;
+  color: var(--input-fg);
+  max-height: 60px;
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent);
+  color: #fff;
+  flex: none;
+}
+
+.home-bar {
+  flex: none;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  background: var(--bar-bg);
+}
+
+.home-bar i {
+  width: 138px;
+  height: 5px;
+  border-radius: 99px;
+  background: var(--hdr-fg);
+  opacity: 0.85;
+}
+
+.nav-bar {
+  flex: none;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 46px;
+  background: var(--bar-bg);
+  color: var(--hdr-fg);
+  opacity: 0.7;
+}
+
+/* ── iMessage ───────────────────────────────────────────────────────────── */
+
+.im .body {
+  padding: 6px 14px 4px;
+  gap: 1px;
+}
+
+.im .bubble {
+  padding: 8px 13px 9px;
+  line-height: 1.22;
+}
+
+.im .bubble.tail::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  bottom: 0;
+  height: 20px;
+  width: 20px;
+}
+
+.im .bubble.tail::after {
+  content: "";
+  position: absolute;
+  z-index: 1;
+  bottom: 0;
+  height: 21px;
+  width: 26px;
+  background: var(--bg);
+}
+
+.im .bubble.tail.out::before {
+  right: -7px;
+  background: var(--out);
+  border-bottom-left-radius: 16px 14px;
+}
+
+.im .bubble.tail.out::after {
+  right: -26px;
+  border-bottom-left-radius: 10px;
+}
+
+.im .bubble.tail.in::before {
+  left: -7px;
+  background: var(--in);
+  border-bottom-right-radius: 16px 14px;
+}
+
+.im .bubble.tail.in::after {
+  left: -26px;
+  border-bottom-right-radius: 10px;
+}
+
+.im .divider {
+  font-size: 11px;
+  padding: 14px 0 6px;
+}
+
+.im .bar {
+  align-items: center;
+  gap: 12px;
+  padding: 7px 12px 8px;
+}
+
+.im .bar .pill {
+  border-radius: 18px;
+  padding: 6px 10px;
+  font-size: 16.5px;
+}
+
+/* ── WhatsApp ───────────────────────────────────────────────────────────── */
+
+.wa {
+  --chip-bg: var(--in);
+}
+
+.wa .body {
+  padding: 8px 8px 4px;
+  gap: 2px;
+}
+
+.wa .bubble {
+  padding: 6px 8px 6px 9px;
+  font-size: 15.5px;
+  line-height: 1.32;
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+  border-radius: 8px;
+}
+
+.wa .bubble.tail::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+
+.wa .bubble.tail.out::after {
+  right: -8px;
+  border-left: 9px solid var(--out);
+  border-bottom: 10px solid transparent;
+}
+
+.wa .bubble.tail.in::after {
+  left: -8px;
+  border-right: 9px solid var(--in);
+  border-bottom: 10px solid transparent;
+}
+
+.wa .meta-in {
+  float: right;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  line-height: 15px;
+  margin: 0 -2px -3px 10px;
+  transform: translateY(5px);
+  color: var(--meta);
+  position: relative;
+  z-index: 2;
+}
+
+.wa .bubble.out .meta-in {
+  color: var(--meta-out);
+}
+
+.wa .divider.chip {
+  background: var(--in);
+  box-shadow: 0 1px 0.5px rgba(11, 20, 26, 0.13);
+}
+
+.wa .bar {
+  align-items: center;
+  padding: 7px 9px 7px;
+  gap: 8px;
+}
+
+.wa .bar .pill {
+  border-radius: 22px;
+  padding: 8px 12px;
+}
+
+/* ── Instagram ──────────────────────────────────────────────────────────── */
+
+.ig .body {
+  padding: 8px 12px 4px;
+  gap: 2px;
+}
+
+.ig .bubble {
+  padding: 9px 13px 10px;
+  font-size: 15px;
+  line-height: 1.28;
+}
+
+.ig .bubble.out {
+  background-image: var(--out);
+  background-color: #4a4bd8;
+}
+
+.ig .receipt {
+  font-size: 11px;
+  padding-top: 3px;
+}
+
+.ig .bar {
+  align-items: center;
+  gap: 10px;
+  padding: 7px 11px 7px;
+}
+
+.ig .bar .pill {
+  border-radius: 22px;
+  padding: 8px 13px;
+  font-size: 14.5px;
+}
+
+.ig .ig-cam {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, #4a5cf5, #9a3fd6);
+  color: #fff;
+  flex: none;
+}
+
+.ig .send-txt {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14.5px;
+  flex: none;
+}
+
+/* ── Hinge ──────────────────────────────────────────────────────────────── */
+
+.hg .body {
+  padding: 6px 14px 4px;
+  gap: 3px;
+}
+
+.hg .bubble {
+  padding: 10px 14px 11px;
+  font-size: 15.5px;
+  line-height: 1.32;
+}
+
+.hg .match-card {
+  align-self: center;
+  text-align: center;
+  max-width: 82%;
+  margin: 6px auto 14px;
+  color: var(--meta);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.hg .match-card b {
+  display: block;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--in-fg);
+  margin-bottom: 3px;
+}
+
+.hg .bar {
+  align-items: center;
+  padding: 8px 12px 8px;
+}
+
+.hg .bar .pill {
+  border-radius: 22px;
+  padding: 9px 14px;
+}
+
+.hg .send-txt {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14.5px;
+}
+
+/* ── Telegram / Messenger / Google Messages / Tinder ────────────────────── */
+
+.bub .bubble {
+  line-height: 1.3;
+}
+
+.p-telegram .bubble {
+  padding: 6px 10px 7px;
+  box-shadow: 0 1px 1px rgba(16, 35, 47, 0.15);
+}
+
+.p-telegram .bubble.tail::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 0;
+  height: 0;
+}
+
+.p-telegram .bubble.tail.out::after {
+  right: -6px;
+  border-bottom: 12px solid var(--out);
+  border-right: 6px solid transparent;
+}
+
+.p-telegram .bubble.tail.in::after {
+  left: -6px;
+  border-bottom: 12px solid var(--in);
+  border-left: 6px solid transparent;
+}
+
+.p-telegram .meta-in {
+  float: right;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  line-height: 14px;
+  margin: 0 0 -3px 9px;
+  transform: translateY(6px);
+  color: var(--meta);
+  position: relative;
+  z-index: 2;
+}
+
+.p-telegram .bubble.out .meta-in {
+  color: var(--meta-out);
+}
+
+.p-telegram .divider.chip {
+  background: rgba(0, 0, 0, 0.22);
+  color: #fff;
+}
+
+.p-messenger .bubble {
+  padding: 8px 12px 9px;
+}
+
+.p-messenger .body {
+  gap: 2px;
+}
+
+.p-sms .bubble {
+  padding: 9px 14px 10px;
+  font-size: 15.5px;
+}
+
+.p-sms .divider {
+  font-size: 12px;
+  padding: 14px 0 10px;
+}
+
+.p-tinder .bubble {
+  padding: 10px 14px 11px;
+}
+
+.p-tinder .bubble.out {
+  background-image: var(--out);
+  background-color: #fd4b60;
+}
+
+.p-tinder .send-txt {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+/* ── Discord ────────────────────────────────────────────────────────────── */
+
+.dc .body {
+  padding: 10px 0 8px;
+  gap: 0;
+}
+
+.dc .dc-msg {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 12px;
+  padding: 2px 14px;
+  width: 100%;
+}
+
+.dc .dc-msg.grouped {
+  padding-top: 0;
+}
+
+.dc .dc-msg:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.dc .dc-av {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.dc .dc-av img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dc .dc-head {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin-bottom: 1px;
+}
+
+.dc .dc-name {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.dc .dc-time {
+  font-size: 11px;
+  color: var(--meta);
+}
+
+.dc .dc-text {
+  font-size: 15px;
+  line-height: 1.38;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  color: var(--in-fg);
+}
+
+.dc .dc-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 14px 6px;
+  color: var(--meta);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dc .dc-divider::before,
+.dc .dc-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.dc .bar {
+  padding: 6px 12px 10px;
+  border-top: 0;
+}
+
+.dc .bar .pill {
+  border-radius: 8px;
+  padding: 11px 14px;
+  border-color: transparent;
+}
