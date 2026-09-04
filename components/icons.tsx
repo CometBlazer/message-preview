@@ -226,3 +226,38 @@ export const RedoIcon = ({ size = 16, style }: P) => (
     <path d="M13.5 5.5l3 3-3 3" />
   </svg>
 );
+
+/* ── Mobile bottom nav ─────────────────────────────────────────────────── */
+
+export const PhoneFrameIcon = ({ size = 19, style }: P) => (
+  <svg viewBox="0 0 24 24" style={{ ...s(size), ...style }} {...stroke} strokeWidth={1.7}>
+    <rect x="6" y="2.5" width="12" height="19" rx="3" />
+    <path d="M10.5 5.2h3" />
+  </svg>
+);
+
+export const PencilIcon = ({ size = 19, style }: P) => (
+  <svg viewBox="0 0 24 24" style={{ ...s(size), ...style }} {...stroke} strokeWidth={1.7}>
+    <path d="M4 20h4l10-10a2.5 2.5 0 00-3.5-3.5L4.5 16.5z" />
+    <path d="M13.5 7.5l3 3" />
+  </svg>
+);
+
+export const ListIcon = ({ size = 19, style }: P) => (
+  <svg viewBox="0 0 24 24" style={{ ...s(size), ...style }} {...stroke} strokeWidth={1.8}>
+    <path d="M4 7h11M4 12h16M4 17h9" />
+  </svg>
+);
+
+export const ImportIcon = ({ size = 19, style }: P) => (
+  <svg viewBox="0 0 24 24" style={{ ...s(size), ...style }} {...stroke} strokeWidth={1.7}>
+    <path d="M12 3.5v10M8 10l4 4 4-4" />
+    <path d="M4.5 16.5v2a2 2 0 002 2h11a2 2 0 002-2v-2" />
+  </svg>
+);
+
+export const CloseIcon = ({ size = 18, style }: P) => (
+  <svg viewBox="0 0 24 24" style={{ ...s(size), ...style }} {...stroke} strokeWidth={2}>
+    <path d="M6 6l12 12M18 6L6 18" />
+  </svg>
+);

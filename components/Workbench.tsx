@@ -9,7 +9,16 @@ import Editor from "./Editor";
 import ImportPanel from "./ImportPanel";
 import SettingsPanel from "./SettingsPanel";
 import { Avatar } from "./chat/parts";
-import { RedoIcon, UndoIcon } from "./icons";
+import {
+  CloseIcon,
+  ImportIcon,
+  ListIcon,
+  PencilIcon,
+  PhoneFrameIcon,
+  RedoIcon,
+  TuneIcon,
+  UndoIcon,
+} from "./icons";
 import type { PlatformId, Sender } from "@/lib/types";
 
 const BADGE: Record<PlatformId, string> = {
@@ -70,16 +79,21 @@ export default function Workbench() {
       <header className="topbar">
         <div className="brand">
           <span className="brand-dot">💬</span>
-          Message Preview
+          <span className="brand-text">Message Preview</span>
         </div>
 
-        <button className="btn sm ghost drawer-btn" onClick={() => setDrawer((d) => !d)} title="Chats">
-          ☰ Chats
+        <button
+          className="btn sm ghost drawer-btn"
+          onClick={() => setDrawer((d) => !d)}
+          title="Chats"
+          aria-label="Chats"
+        >
+          ☰<span className="btn-label"> Chats</span>
         </button>
 
         <div className="spacer" />
 
-        <div className="seg" title="Undo (Ctrl+Z) / Redo (Ctrl+Shift+Z)">
+        <div className="seg history" title="Undo (Ctrl+Z) / Redo (Ctrl+Shift+Z)">
           <button onClick={() => dispatch({ type: "undo" })} disabled={!canUndo} aria-label="Undo">
             <UndoIcon />
           </button>
@@ -88,7 +102,7 @@ export default function Workbench() {
           </button>
         </div>
 
-        <div className="seg" title="Whose phone are you looking at?">
+        <div className="seg pov" title="Whose phone are you looking at?">
           <button data-on={s.pov === "me"} onClick={() => setPov("me")}>
             My phone
           </button>
@@ -104,15 +118,31 @@ export default function Workbench() {
           value={width}
           onChange={(e) => setWidth(Number(e.target.value))}
           style={{ width: 90 }}
+          className="width-slider"
           title="Phone size"
         />
       </header>
+
+      <div
+        className="drawer-scrim"
+        data-open={drawer}
+        onClick={() => setDrawer(false)}
+        aria-hidden
+      />
 
       <div className="cols">
         <aside className="pane threads" data-open={drawer}>
           <div className="section">
             <div className="row" style={{ justifyContent: "space-between", marginBottom: 8 }}>
               <h3 style={{ margin: 0 }}>Chats</h3>
+              <button
+                className="icon-btn drawer-btn"
+                onClick={() => setDrawer(false)}
+                aria-label="Close chats"
+                style={{ marginLeft: "auto" }}
+              >
+                <CloseIcon />
+              </button>
               <button
                 className="btn sm"
                 onClick={() =>
@@ -231,13 +261,38 @@ export default function Workbench() {
         </div>
       )}
 
+      {/* On a phone this is the only navigation: one row, five destinations,
+          sitting above the home indicator. */}
       <nav className="mobile-tabs">
-        <button data-on={mobile === "preview"} onClick={() => setMobile("preview")}>
+        <button
+          data-on={mobile === "preview"}
+          onClick={() => setMobile("preview")}
+          aria-label="Preview"
+        >
+          <PhoneFrameIcon />
           Preview
         </button>
-        <button data-on={mobile === "tools"} onClick={() => setMobile("tools")}>
-          Draft &amp; edit
-        </button>
+        {(
+          [
+            ["compose", "Draft", <PencilIcon key="i" />],
+            ["edit", "Thread", <ListIcon key="i" />],
+            ["import", "Import", <ImportIcon key="i" />],
+            ["setup", "Setup", <TuneIcon key="i" size={19} />],
+          ] as [Tab, string, React.ReactNode][]
+        ).map(([id, label, icon]) => (
+          <button
+            key={id}
+            data-on={mobile === "tools" && tab === id}
+            onClick={() => {
+              setTab(id);
+              setMobile("tools");
+            }}
+            aria-label={label}
+          >
+            {icon}
+            {label}
+          </button>
+        ))}
       </nav>
     </div>
   );

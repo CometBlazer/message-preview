@@ -33,6 +33,33 @@ Installing needs `https` or `localhost` — over the LAN address a browser will
 serve the page but won't offer to install it, so either install from the
 desktop or put it behind a tunnel/static host.
 
+### Updating an installed copy
+
+Rebuild, serve, then launch the installed app twice. The first launch fetches
+the new service worker; the second runs the new build (the app also reloads
+itself when a new worker takes over). If it ever looks stuck on an old version,
+remove it from the Home Screen and add it again.
+
+## On a phone
+
+The layout is built for a 390px screen in standalone mode, where iOS hands the
+web view the whole display — including the strip behind the Dynamic Island and
+the home indicator. Both are handled with `env(safe-area-inset-*)`: the top bar
+paints its own background up into the notch strip, and the bottom nav sits
+above the home indicator.
+
+The phone layout differs from the desktop one:
+
+- one top row that never wraps — menu, undo/redo, and the POV switch, which is
+  the control you actually reach for
+- a five-item bottom bar (Preview, Draft, Thread, Import, Setup) as the only
+  navigation, instead of two stacked tab strips
+- the chat list is a full-height sheet over the app rather than a column
+- every text field is 16px, because iOS zooms the whole page when you focus
+  anything smaller
+- the preview stays rendered while you're on a tool tab, just invisible, so the
+  live "% of their screen" measurement keeps working
+
 ## What's in it
 
 **Nine platform skins.** Header, bubbles, tails, grouping, timestamps, read
@@ -92,6 +119,11 @@ next to the preview and nudge anything that looks off.
 
 **Export.** Save the preview as a PNG (captures what you're actually looking
 at, scroll position included), or back up everything as JSON.
+
+**Offline.** The service worker caches the app shell. Navigations are
+network-first so a rebuild lands as soon as it's reachable, with the cache as
+the fallback when it isn't; hashed build assets are cache-first forever, and
+everything else is served from cache and refreshed in the background.
 
 ## How the OCR works
 

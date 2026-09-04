@@ -5,7 +5,11 @@
 .phone {
   position: relative;
   /* never taller than the stage: height drives the width back down */
-  width: min(var(--phone-w, 390px), 100%, calc((100dvh - var(--stage-chrome, 150px)) * 390 / 844));
+  width: min(
+    var(--phone-w, 390px),
+    100%,
+    calc((100dvh - var(--stage-chrome, 150px) - var(--safe-t, 0px) - var(--safe-b, 0px)) * 390 / 844)
+  );
   flex: none;
 }
 

@@ -13,6 +13,11 @@
   --ui-accent-fg: #0c0d11;
   --ui-danger: #e0463c;
   --ui-radius: 12px;
+  /* iPhone notch / Dynamic Island / home indicator */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
   --sans: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
   --roboto: var(--font-roboto), var(--font-sans), system-ui, sans-serif;
   --serif: var(--font-serif), Georgia, "Times New Roman", serif;
@@ -48,6 +53,7 @@ textarea {
 
 button {
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 ::-webkit-scrollbar {
@@ -77,7 +83,7 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 8px 12px;
+  padding: calc(8px + var(--safe-t)) calc(12px + var(--safe-r)) 8px calc(12px + var(--safe-l));
   border-bottom: 1px solid var(--ui-line);
   background: var(--ui-panel);
   flex-wrap: wrap;
@@ -721,7 +727,7 @@ label.lbl {
 .toast {
   position: fixed;
   left: 50%;
-  bottom: 22px;
+  bottom: calc(22px + var(--safe-b));
   transform: translateX(-50%);
   display: flex;
   align-items: center;
@@ -748,15 +754,22 @@ label.lbl {
   }
 }
 
-/* ── Mobile ─────────────────────────────────────────────────────────────── */
+/* ── Mobile ─────────────────────────────────────────────────────────────
+
+   Tested against a 390px viewport in standalone mode, where the top strip is
+   under the Dynamic Island and the bottom under the home indicator.        */
 
 .mobile-tabs {
   display: none;
 }
 
+.drawer-scrim {
+  display: none;
+}
+
 @media (max-width: 1100px) {
   .cols {
-    grid-template-columns: minmax(0, 1fr) 360px;
+    grid-template-columns: minmax(0, 1fr) 340px;
   }
   .drawer-btn {
     display: inline-flex;
@@ -764,56 +777,172 @@ label.lbl {
   .pane.threads {
     display: none;
   }
+  /* full-height sheet instead of a hardcoded offset under the header */
   .pane.threads[data-open="true"] {
     display: block;
     position: fixed;
-    inset: 49px auto 0 0;
-    width: 260px;
+    inset: 0 auto 0 0;
+    width: min(320px, 84vw);
     z-index: 40;
+    padding: var(--safe-t) 0 var(--safe-b);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  }
+  .drawer-scrim[data-open="true"] {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 39;
+    background: rgba(0, 0, 0, 0.55);
   }
 }
 
 @media (max-width: 800px) {
   .cols {
     grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
   }
   .pane.tools {
     display: none;
   }
   .stage {
-    padding: 10px 6px 0;
-    --stage-chrome: 190px;
+    padding: 8px 8px 0;
+    --stage-chrome: 178px;
   }
   .app[data-tab="tools"] .pane.tools {
     display: block;
     border-left: 0;
   }
+  /* The draft's "% of their screen" is measured from the rendered bubble, so
+     the preview stays in the DOM at full size — just out of sight. */
   .app[data-tab="tools"] .stage {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100dvh;
+    opacity: 0;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* one row that always fits: mark · menu · POV (grows) · undo/redo */
+  .topbar {
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding-right: calc(10px + var(--safe-r));
+    padding-left: calc(10px + var(--safe-l));
+    padding-bottom: 8px;
+    overflow: hidden;
+  }
+  .brand-text,
+  .btn-label,
+  .width-slider,
+  .spacer {
     display: none;
   }
+  .brand,
+  .drawer-btn,
+  .seg.history {
+    flex: none;
+    margin: 0;
+  }
+  .seg.history button {
+    padding: 8px 9px;
+  }
+  .seg.pov {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .seg.pov button {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 8px 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* the bottom bar is the tool switcher, so the pane's own tabs are redundant */
+  .pane.tools .tabs {
+    display: none;
+  }
+  .pane.tools {
+    padding-bottom: 12px;
+  }
+
+  /* iOS zooms the whole page when you focus a field under 16px */
+  .field,
+  input,
+  select,
+  textarea,
+  .ed-row textarea {
+    font-size: 16px;
+  }
+  .hexbox {
+    font-size: 13px;
+    width: 118px;
+  }
+
+  .btn {
+    padding: 10px 13px;
+    font-size: 13.5px;
+  }
+  .btn.sm {
+    padding: 8px 10px;
+  }
+  .seg button {
+    padding: 9px 11px;
+    font-size: 13px;
+  }
+  .section {
+    padding: 14px 12px;
+  }
+  .statgrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .swatch-row {
+    grid-template-columns: 1fr auto auto;
+    gap: 10px;
+    padding: 7px 0;
+  }
+
   .mobile-tabs {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    padding: 6px calc(6px + var(--safe-l)) calc(6px + var(--safe-b)) calc(6px + var(--safe-r));
     border-top: 1px solid var(--ui-line);
     background: var(--ui-panel);
   }
   .mobile-tabs button {
-    background: var(--ui-panel-2);
-    border: 1px solid var(--ui-line);
-    border-radius: 9px;
-    padding: 9px;
+    display: grid;
+    justify-items: center;
+    gap: 3px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    padding: 7px 2px 6px;
     color: var(--ui-muted);
+    font-size: 10.5px;
+    line-height: 1;
   }
   .mobile-tabs button[data-on="true"] {
     background: #2b3143;
     color: var(--ui-fg);
     font-weight: 600;
   }
-  .statgrid {
-    grid-template-columns: repeat(2, 1fr);
+}
+
+/* very narrow phones: give the preview every pixel it can get */
+@media (max-width: 430px) {
+  .stage {
+    padding: 6px 4px 0;
+    --stage-chrome: 168px;
+  }
+  .phone.framed {
+    padding: 7px;
+    border-radius: 44px;
+  }
+  .phone.framed .screen {
+    border-radius: 37px;
   }
 }
