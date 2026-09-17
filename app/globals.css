@@ -456,10 +456,31 @@ label.lbl {
   align-items: flex-start;
 }
 
+/* Auto-growing message box. The textarea and an invisible copy of its text
+   share one grid cell, so the taller of the two sets the height — no
+   scrollHeight measuring, which reads zero while the pane is display:none on
+   a phone and would leave every row blank. */
 .ed-text {
   flex: 1;
   min-width: 0;
   padding-top: 3px;
+  display: grid;
+}
+
+.ed-text::after {
+  content: attr(data-value) " ";
+  visibility: hidden;
+}
+
+.ed-text::after,
+.ed-row textarea {
+  grid-area: 1 / 1;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-family: var(--sans);
+  line-height: 1.45;
+  font-size: 13.5px;
 }
 
 .ed-row textarea {
@@ -468,8 +489,6 @@ label.lbl {
   border: 0;
   outline: none;
   resize: none;
-  line-height: 1.45;
-  font-size: 13.5px;
   overflow: hidden;
   padding: 0;
 }
@@ -891,7 +910,8 @@ label.lbl {
   input,
   select,
   textarea,
-  .ed-row textarea {
+  .ed-row textarea,
+  .ed-text::after {
     font-size: 16px;
   }
   .hexbox {
@@ -920,6 +940,12 @@ label.lbl {
     grid-template-columns: 1fr auto auto;
     gap: 10px;
     padding: 7px 0;
+  }
+
+  /* the tab bar owns the bottom of the screen, so the toast sits above it */
+  .toast {
+    bottom: calc(70px + var(--safe-b));
+    max-width: calc(100vw - 24px);
   }
 
   .mobile-tabs {

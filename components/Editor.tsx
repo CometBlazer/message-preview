@@ -4,27 +4,29 @@ import React, { useRef, useState } from "react";
 import { useStore } from "@/lib/store";
 import type { DeliveryStatus, Message } from "@/lib/types";
 import { readFileAsDataURL, shrinkImage, timeOfDay } from "@/lib/util";
-import { MoveDownIcon, MoveUpIcon, TrashIcon, TuneIcon } from "@/components/icons";
+import { CheckIcon, CopyIcon, MoveDownIcon, MoveUpIcon, TrashIcon, TuneIcon } from "@/components/icons";
+import { copyText, transcriptText } from "@/lib/clipboard";
 
 const REACTIONS = ["", "❤️", "😂", "👍", "👎", "‼️", "❓"];
 const STATUSES: DeliveryStatus[] = ["sent", "delivered", "read"];
 
+/**
+ * A textarea that grows with its content. The sizing is done in CSS — an
+ * invisible copy of the text in `.ed-text::after` sets the row height — rather
+ * than by measuring scrollHeight: on a phone this panel is display:none until
+ * you switch to it, and a measured height would come back zero and leave every
+ * row blank.
+ */
 function AutoTextarea({ value, onChange }: { value: string; onChange: (v: string) => void }) {
-  const ref = useRef<HTMLTextAreaElement>(null);
-  React.useLayoutEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    el.style.height = "0px";
-    el.style.height = el.scrollHeight + "px";
-  }, [value]);
   return (
-    <textarea
-      ref={ref}
-      rows={1}
-      value={value}
-      placeholder="Empty message"
-      onChange={(e) => onChange(e.target.value)}
-    />
+    <div className="ed-text" data-value={value}>
+      <textarea
+        rows={1}
+        value={value}
+        placeholder="Empty message"
+        onChange={(e) => onChange(e.target.value)}
+      />
+    </div>
   );
 }
 
@@ -33,6 +35,7 @@ export default function Editor() {
   const [openId, setOpenId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [imageFor, setImageFor] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   if (!thread) return null;
 
@@ -61,6 +64,24 @@ export default function Editor() {
     dispatch({ type: "deleteMessage", threadId: thread.id, id: m.id });
   };
 
+  const copyOne = async (m: Message) => {
+    if (!m.text.trim()) return;
+    const ok = await copyText(m.text.trim());
+    setCopiedId(ok ? m.id : null);
+    dispatch({ type: "notice", label: ok ? "Message copied" : "Couldn't reach the clipboard" });
+    if (ok) setTimeout(() => setCopiedId((id) => (id === m.id ? null : id)), 1400);
+  };
+
+  const copyAll = async () => {
+    const text = transcriptText(thread.messages, thread.myName || "Me", thread.name);
+    if (!text) return;
+    const ok = await copyText(text);
+    dispatch({
+      type: "notice",
+      label: ok ? "Whole thread copied" : "Couldn't reach the clipboard",
+    });
+  };
+
   const clearAll = () => {
     if (!thread.messages.length) return;
     if (
@@ -75,6 +96,9 @@ export default function Editor() {
   return (
     <div className="section">
       <h3>Transcript · {thread.messages.length} messages</h3>
+      <div className="tiny muted" style={{ marginBottom: 10 }}>
+        Tap a message in the preview to copy it.
+      </div>
 
       {thread.messages.length === 0 && (
         <div className="tiny muted" style={{ marginBottom: 10 }}>
@@ -95,9 +119,7 @@ export default function Editor() {
               >
                 {m.from === "me" ? "Me" : "Them"}
               </button>
-              <div className="ed-text">
-                <AutoTextarea value={m.text} onChange={(v) => patch(m.id, { text: v })} />
-              </div>
+              <AutoTextarea value={m.text} onChange={(v) => patch(m.id, { text: v })} />
             </div>
 
             {m.image && (
@@ -134,6 +156,15 @@ export default function Editor() {
                 aria-label="Move down"
               >
                 <MoveDownIcon />
+              </button>
+              <button
+                className="icon-btn"
+                onClick={() => void copyOne(m)}
+                disabled={!m.text.trim()}
+                title="Copy this message"
+                aria-label="Copy this message"
+              >
+                {copiedId === m.id ? <CheckIcon /> : <CopyIcon />}
               </button>
               <button
                 className="icon-btn"
@@ -251,6 +282,15 @@ export default function Editor() {
           + My message
         </button>
         <span style={{ flex: 1 }} />
+        <button
+          className="btn"
+          onClick={() => void copyAll()}
+          disabled={!thread.messages.some((m) => m.text.trim())}
+          title="Copy the whole thread as plain text"
+        >
+          <CopyIcon size={15} />
+          Copy all
+        </button>
         <button
           className="btn ghost danger"
           onClick={clearAll}

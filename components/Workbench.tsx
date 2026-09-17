@@ -37,7 +37,7 @@ type Tab = "compose" | "edit" | "import" | "setup";
 
 export default function Workbench() {
   const { state, dispatch, thread } = useStore();
-  const [tab, setTab] = useState<Tab>("compose");
+  const [tab, setTab] = useState<Tab>("edit");
   const [mobile, setMobile] = useState<"preview" | "tools">("preview");
   const [drawer, setDrawer] = useState(false);
   const [width, setWidth] = useState(378);
@@ -217,7 +217,8 @@ export default function Workbench() {
                 <div className="tiny muted stage-caption" style={{ textAlign: "center", maxWidth: 380 }}>
                   {s.pov === "me"
                     ? "Your phone. Switch to their phone to see how your draft lands."
-                    : `${thread.name}'s phone — your messages are the ones on the left.`}
+                    : `${thread.name}'s phone — your messages are the ones on the left.`}{" "}
+                  Tap any message to copy it.
                 </div>
               </>
             ) : (
@@ -238,9 +239,9 @@ export default function Workbench() {
 
         <aside className="pane tools">
           <div className="tabs">
-            {(["compose", "edit", "import", "setup"] as Tab[]).map((t) => (
+            {(["edit", "compose", "import", "setup"] as Tab[]).map((t) => (
               <button key={t} data-on={tab === t} onClick={() => setTab(t)}>
-                {t === "compose" ? "Draft" : t === "edit" ? "Thread" : t === "import" ? "Import" : "Setup"}
+                {t === "edit" ? "Thread" : t === "compose" ? "Draft" : t === "import" ? "Import" : "Setup"}
               </button>
             ))}
           </div>
@@ -275,8 +276,8 @@ export default function Workbench() {
         </button>
         {(
           [
-            ["compose", "Draft", <PencilIcon key="i" />],
             ["edit", "Thread", <ListIcon key="i" />],
+            ["compose", "Draft", <PencilIcon key="i" />],
             ["import", "Import", <ImportIcon key="i" />],
             ["setup", "Setup", <TuneIcon key="i" size={19} />],
           ] as [Tab, string, React.ReactNode][]

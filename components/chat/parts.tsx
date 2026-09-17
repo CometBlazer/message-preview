@@ -9,6 +9,51 @@ import { Battery, Cellular, Wifi, AndroidNav } from "@/components/icons";
 
 export const DRAFT_ID = "__draft";
 
+/**
+ * Tap-to-copy for anything rendered inside the preview. Preview supplies the
+ * handler; every engine picks it up through `useCopyProps` so a bubble, or a
+ * Discord line, copies its own text without each skin re-implementing it.
+ */
+const CopyCtx = React.createContext<((text: string) => void) | null>(null);
+
+export function CopyProvider({
+  onCopy,
+  children,
+}: {
+  onCopy: (text: string) => void;
+  children: React.ReactNode;
+}) {
+  return <CopyCtx.Provider value={onCopy}>{children}</CopyCtx.Provider>;
+}
+
+/** Props that turn an element into "tap me to copy this text". */
+export function useCopyProps(text: string): React.HTMLAttributes<HTMLElement> {
+  const onCopy = React.useContext(CopyCtx);
+  const body = text.trim();
+  if (!onCopy || !body) return {};
+
+  const run = () => {
+    // Don't hijack the click that ends a text selection inside the bubble.
+    const sel = typeof window !== "undefined" ? window.getSelection() : null;
+    if (sel && !sel.isCollapsed && sel.toString().trim()) return;
+    onCopy(body);
+  };
+
+  return {
+    role: "button",
+    tabIndex: 0,
+    title: "Copy this message",
+    "aria-label": `Copy message: ${body.slice(0, 60)}`,
+    onClick: run,
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key !== "Enter" && e.key !== " ") return;
+      e.preventDefault();
+      run();
+    },
+    "data-copy": "1",
+  } as React.HTMLAttributes<HTMLElement>;
+}
+
 export interface ChatProps {
   thread: Thread;
   rows: Row[];
@@ -117,11 +162,13 @@ export function Bubble({
 }) {
   const tailed = hasTail(platform, row.first, row.last);
   const radius = bubbleRadius(platform, row.side, row.first, row.last, tailed);
+  const copyProps = useCopyProps(row.msg.text);
   return (
     <div
       className={`bubble ${row.side} ${tailed ? "tail" : ""} ${extraClass}`}
       style={{ borderRadius: radius }}
       data-draft-bubble={row.msg.id === DRAFT_ID ? "1" : undefined}
+      {...copyProps}
     >
       {row.msg.reaction && <span className="reaction">{row.msg.reaction}</span>}
       {row.msg.image && <img className="att" src={row.msg.image} alt="" />}

@@ -60,8 +60,9 @@ The phone layout differs from the desktop one:
   however tall the preview happens to be
 - one top row that never wraps — menu, undo/redo, and the POV switch, which is
   the control you actually reach for
-- a five-item bottom bar (Preview, Draft, Thread, Import, Setup) as the only
-  navigation, instead of two stacked tab strips
+- a five-item bottom bar (Preview, Thread, Draft, Import, Setup) as the only
+  navigation, instead of two stacked tab strips. Thread is the tab you land on,
+  since editing what's already there is the common case
 - the chat list is a full-height sheet over the app rather than a column
 - every text field is 16px, because iOS zooms the whole page when you focus
   anything smaller
@@ -102,10 +103,18 @@ type it, with:
   the app shell but not the 15 MB language model, so run one screenshot import
   while the files are reachable; after that OCR is cached too.
 
-**Thread editing.** Swap a message's sender, reorder, retime, attach an image,
-add a reaction, set delivery status per message. Each message's controls sit on
-their own footer line with 32px targets and the delete button set apart behind
-a divider, so nothing destructive is a near-miss away.
+**Thread editing.** Swap a message's sender, reorder, retime, copy, attach an
+image, add a reaction, set delivery status per message. Each message's controls
+sit on their own footer line with 32px targets and the delete button set apart
+behind a divider, so nothing destructive is a near-miss away.
+
+**Copy messages.** Tap any message in the preview and its text goes to the
+clipboard — the bubble takes a ring on hover and focus, and a toast confirms.
+Every skin gets it, including Discord's bubble-less rows. The Thread tab has
+the same thing per row, plus *Copy all* for the whole conversation as
+`Name: message` lines. Where `navigator.clipboard` is missing or doesn't
+answer — a plain-http dev server on the LAN, say — it falls back rather than
+leaving you wondering whether anything happened.
 
 **Undo.** Ctrl/Cmd+Z undoes any edit — a deleted message, a cleared thread, a
 reorder, an import, a colour change — and Ctrl+Shift+Z (or Ctrl+Y) redoes it.

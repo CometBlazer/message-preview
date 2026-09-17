@@ -359,6 +359,37 @@
   z-index: 2;
 }
 
+/* ── Tap to copy ──────────────────────────────────────────────────────────
+   Bubbles are copy buttons. The affordance has to stay quiet or the skin
+   stops reading as a real screenshot, so it's a ring on hover/focus only —
+   nothing that would show up in an exported PNG.                           */
+
+[data-copy="1"] {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Two rings — the screen's own background, then the accent — so it shows up
+   whether the bubble is the accent colour itself or the grey one under it. */
+@media (hover: hover) {
+  [data-copy="1"]:hover {
+    box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+  }
+}
+
+[data-copy="1"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--accent);
+}
+
+[data-copy="1"]:active {
+  opacity: 0.82;
+}
+
+.dc .dc-text[data-copy="1"] {
+  border-radius: 4px;
+}
+
 .receipt {
   align-self: flex-end;
   font-size: 11px;

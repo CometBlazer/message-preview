@@ -3,7 +3,8 @@
 import React, { useMemo } from "react";
 import { useStore, useTheme } from "@/lib/store";
 import { buildRows } from "@/lib/grouping";
-import { messagesWithDraft } from "./chat/parts";
+import { copyText } from "@/lib/clipboard";
+import { CopyProvider, messagesWithDraft } from "./chat/parts";
 import type { ChatProps } from "./chat/parts";
 import IMessage from "./chat/IMessage";
 import WhatsApp from "./chat/WhatsApp";
@@ -33,7 +34,7 @@ const ENGINES: Record<string, React.ComponentType<ChatProps>> = {
 export const PREVIEW_ID = "preview-screen";
 
 export default function Preview({ width = 390 }: { width?: number }) {
-  const { state, thread, draft } = useStore();
+  const { state, dispatch, thread, draft } = useStore();
   const platformId = thread?.platform ?? "imessage";
   const { platform, theme } = useTheme(platformId);
   const s = state.settings;
@@ -45,6 +46,19 @@ export default function Preview({ width = 390 }: { width?: number }) {
       : thread.messages;
     return buildRows(msgs, s.pov, platform, s.hour24);
   }, [thread, draft, s.showDraft, s.draftFrom, s.pov, s.hour24, platform]);
+
+  // Tapping a bubble copies that message — see CopyProvider below.
+  const onCopy = React.useCallback(
+    (text: string) => {
+      void copyText(text).then((ok) =>
+        dispatch({
+          type: "notice",
+          label: ok ? "Message copied" : "Couldn't reach the clipboard",
+        })
+      );
+    },
+    [dispatch]
+  );
 
   if (!thread) return null;
 
@@ -82,15 +96,17 @@ export default function Preview({ width = 390 }: { width?: number }) {
         className={`screen ${ENGINE_CLASS[platform.engine]} p-${platform.id}`}
         data-font={platform.font}
       >
-        <Engine
-          thread={thread}
-          rows={rows}
-          platform={platform}
-          theme={theme}
-          settings={s}
-          pov={s.pov}
-          barText={s.showDraft ? "" : draft}
-        />
+        <CopyProvider onCopy={onCopy}>
+          <Engine
+            thread={thread}
+            rows={rows}
+            platform={platform}
+            theme={theme}
+            settings={s}
+            pov={s.pov}
+            barText={s.showDraft ? "" : draft}
+          />
+        </CopyProvider>
       </div>
     </div>
   );

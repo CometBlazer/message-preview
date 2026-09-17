@@ -193,6 +193,19 @@ export const TrashIcon = ({ size = 17, style }: P) => (
   </svg>
 );
 
+export const CopyIcon = ({ size = 17, style }: P) => (
+  <svg viewBox="0 0 24 24" style={{ ...s(size), ...style }} {...stroke} strokeWidth={1.7}>
+    <rect x="9" y="9" width="11" height="11" rx="2.5" />
+    <path d="M15 5.5A2.5 2.5 0 0012.5 3h-7A2.5 2.5 0 003 5.5v7A2.5 2.5 0 005.5 15" />
+  </svg>
+);
+
+export const CheckIcon = ({ size = 17, style }: P) => (
+  <svg viewBox="0 0 24 24" style={{ ...s(size), ...style }} {...stroke} strokeWidth={2.2}>
+    <path d="M5 12.5l4.5 4.5L19 7" />
+  </svg>
+);
+
 export const MoveUpIcon = ({ size = 17, style }: P) => (
   <svg viewBox="0 0 24 24" style={{ ...s(size), ...style }} {...stroke} strokeWidth={2}>
     <path d="M12 19.5V5M6 11l6-6 6 6" />
